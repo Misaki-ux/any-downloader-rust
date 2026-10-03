@@ -184,11 +184,11 @@ impl eframe::App for App {
                     ui.label("Paste URL / magnet / torrent / git repo / youtube / etc.");
 
                     ui.add_space(10.0);
-                    ui.add_sized([egui::em(30.0), 0.0], egui::TextEdit::singleline(&mut self.url).hint_text("https://example.com/file.zip"));
+                    ui.add_sized([ui.available_width().min(500.0), 0.0], egui::TextEdit::singleline(&mut self.url).hint_text("https://example.com/file.zip"));
 
                     ui.add_space(15.0);
 
-                    if ui.add_sized([egui::em(15.0), 0.0], egui::Button::new("Download")).clicked() && !self.url.is_empty() {
+                    if ui.add_sized([150.0, 0.0], egui::Button::new("Download")).clicked() && !self.url.is_empty() {
                         let url = self.url.clone();
                         let download_type = DownloadType::from_url(&url);
                         self.status = format!("Starting {} download...", format!("{:?}", download_type).to_lowercase());
@@ -231,19 +231,19 @@ impl eframe::App for App {
                     ui.add_space(10.0);
 
                     ui.label("Download Directory:");
-                    ui.add_sized([egui::em(30.0), 0.0], egui::TextEdit::singleline(&mut self.config.download_dir));
+                    ui.add_sized([ui.available_width().min(500.0), 0.0], egui::TextEdit::singleline(&mut self.config.download_dir));
                     ui.add_space(10.0);
 
                     ui.label("aria2c Path (for torrents):");
-                    ui.add_sized([egui::em(30.0), 0.0], egui::TextEdit::singleline(&mut self.config.aria2c_path));
+                    ui.add_sized([ui.available_width().min(500.0), 0.0], egui::TextEdit::singleline(&mut self.config.aria2c_path));
                     ui.add_space(10.0);
 
                     ui.label("yt-dlp Path (for YouTube):");
-                    ui.add_sized([egui::em(30.0), 0.0], egui::TextEdit::singleline(&mut self.config.yt_dlp_path));
+                    ui.add_sized([ui.available_width().min(500.0), 0.0], egui::TextEdit::singleline(&mut self.config.yt_dlp_path));
                     ui.add_space(10.0);
 
                     ui.label("git Path (for repos):");
-                    ui.add_sized([egui::em(30.0), 0.0], egui::TextEdit::singleline(&mut self.config.git_path));
+                    ui.add_sized([ui.available_width().min(500.0), 0.0], egui::TextEdit::singleline(&mut self.config.git_path));
                     ui.add_space(20.0);
 
                     ui.separator();
@@ -284,7 +284,7 @@ impl eframe::App for App {
                             (self.config.primary_color[1] * 255.0) as u8,
                             (self.config.primary_color[2] * 255.0) as u8,
                         );
-                        if egui::color_picker::color_picker_color32(ui, &mut primary_color, egui::color_picker::Alpha::Opaque).changed() {
+                        if egui::color_picker::color_picker_color32(ui, &mut primary_color, egui::color_picker::Alpha::Opaque) {
                             self.config.primary_color = [
                                 primary_color.r() as f32 / 255.0,
                                 primary_color.g() as f32 / 255.0,
@@ -301,7 +301,7 @@ impl eframe::App for App {
                             (self.config.secondary_color[1] * 255.0) as u8,
                             (self.config.secondary_color[2] * 255.0) as u8,
                         );
-                        if egui::color_picker::color_picker_color32(ui, &mut secondary_color, egui::color_picker::Alpha::Opaque).changed() {
+                        if egui::color_picker::color_picker_color32(ui, &mut secondary_color, egui::color_picker::Alpha::Opaque) {
                             self.config.secondary_color = [
                                 secondary_color.r() as f32 / 255.0,
                                 secondary_color.g() as f32 / 255.0,
@@ -314,7 +314,7 @@ impl eframe::App for App {
                     ui.separator();
                     ui.add_space(15.0);
 
-                    if ui.add_sized([egui::em(10.0), 0.0], egui::Button::new("💾 Save Config")).clicked() {
+                    if ui.add_sized([120.0, 0.0], egui::Button::new("💾 Save Config")).clicked() {
                         if let Ok(config_str) = serde_json::to_string_pretty(&self.config) {
                             let _ = std::fs::write("config.json", config_str);
                             self.status = "Configuration saved".to_string();
