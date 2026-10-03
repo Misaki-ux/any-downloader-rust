@@ -9,6 +9,7 @@ A modern Rust GUI application for downloading files from various sources without
 ## Features
 
 - 🎨 **Modern Dark Theme** - Clean, professional interface
+- 🪟 **Custom App Branding** - Uses the project icon in the native window and a modern custom top bar
 - 📥 **Multi-Protocol Support**:
   - HTTP/HTTPS file downloads
   - Magnet links (via aria2c)
@@ -17,10 +18,12 @@ A modern Rust GUI application for downloading files from various sources without
   - YouTube videos (via yt-dlp)
 - 📊 **Real-time Progress** - Download speed and progress tracking
 - ⚙️ **Customizable** - Configure paths, window size, and theme colors
+- 📜 **Scrollable Settings** - Access the full configuration panel in a compact window
 - 📦 **Built-in Dependency Installer** - Install aria2c, yt-dlp, and git directly from the app
 - 🎯 **Auto-Detection** - Automatically detects download type from URL
 - 💾 **Config Persistence** - Settings saved to JSON file
-- 📌 **Pin Mode** - Keep window always on top (requires restart)
+- 📌 **Pin Mode** - Keep window always on top
+- ⚖️ **MIT Licensed** - License and copyright notice shown in the app
 
 ## Screenshots
 
@@ -70,12 +73,13 @@ The executable will be located at `target\release\any_downloader.exe`.
 
 ### Configuration
 
-Navigate to the **Config** tab to customize:
+Navigate to the **Settings** tab to customize:
 
 - **Paths**: Download directory, aria2c, yt-dlp, and git executable paths
 - **Window Size**: Set initial window dimensions
 - **Theme Colors**: Customize primary and secondary colors using the color picker
-- **Always on Top**: Enable pin mode (requires app restart)
+- **Always on Top**: Toggle pin mode immediately
+- Settings can be scrolled vertically; the default window size is 640 × 960 pixels
 
 ### Installing Dependencies
 
@@ -97,8 +101,8 @@ The application creates a `config.json` file in the application directory:
   "git_path": "git",
   "primary_color": [0.27, 0.51, 0.71],
   "secondary_color": [0.39, 0.58, 0.93],
-  "window_width": 600.0,
-  "window_height": 500.0,
+  "window_width": 640.0,
+  "window_height": 960.0,
   "always_on_top": false
 }
 ```
@@ -159,10 +163,6 @@ cargo test
 - Or manually install from https://git-scm.com/
 - Or configure the path in Config tab
 
-### Pin mode not working
-- Pin mode requires restarting the application to take effect
-- This is a limitation of the egui 0.27 API
-
 ## Development
 
 ### Project Structure
@@ -197,7 +197,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Copyright © 2026 Yohann / Misaki-ux. This project is licensed under the MIT License; see [LICENSE](LICENSE) for the full terms.
 
 ## Acknowledgments
 
@@ -212,4 +212,4 @@ For issues and questions, please open an issue on GitHub.
 
 ---
 
-Made with ❤️ in Rust
+Made with ❤️ in Rust by [Misaki-ux](https://github.com/Misaki-ux)
