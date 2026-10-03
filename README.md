@@ -1,6 +1,6 @@
 # Any Downloader V 1.0.3
 
-<img width="644" height="987" alt="image" src="https://github.com/user-attachments/assets/213f7e62-09b4-43a0-984d-8fc2615dbf87" />
+
 A modern Rust GUI application for downloading files from various sources without using Windows Explorer dialogs.
 
 ![Rust](https://img.shields.io/badge/Rust-1.99.0-orange)
@@ -29,9 +29,11 @@ A modern Rust GUI application for downloading files from various sources without
 
 ## Screenshots
 
-![Download Tab](https://via.placeholder.com/600x400?text=Download+Tab)
-![Config Tab](https://via.placeholder.com/600x400?text=Config+Tab)
-![Dependencies Tab](https://via.placeholder.com/600x400?text=Dependencies+Tab)
+![Download Tab]<img width="644" height="987" alt="image" src="https://github.com/user-attachments/assets/213f7e62-09b4-43a0-984d-8fc2615dbf87" />
+![Config Tab]<img width="638" height="985" alt="image" src="https://github.com/user-attachments/assets/78b61013-2948-474b-9931-f747bb25bc10" />
+
+![Dependencies Tab]<img width="645" height="542" alt="image" src="https://github.com/user-attachments/assets/46fbf77b-13ae-4de2-baf2-8c029fdf1620" />
+
 
 ## Installation
 
