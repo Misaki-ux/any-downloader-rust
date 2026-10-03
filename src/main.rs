@@ -118,7 +118,7 @@ impl eframe::App for App {
         ctx.request_repaint();
 
         if self.logo.is_none() {
-            if let Ok(icon) = eframe::icon_data::from_png_bytes(include_bytes!("assets/rust-downloader-icon.png")) {
+            if let Some(icon) = load_app_icon() {
                 let image = egui::ColorImage::from_rgba_unmultiplied(
                     [icon.width as usize, icon.height as usize],
                     &icon.rgba,
@@ -462,7 +462,7 @@ fn main() -> eframe::Result<()> {
     if config.always_on_top {
         viewport = viewport.with_always_on_top();
     }
-    if let Ok(icon) = eframe::icon_data::from_png_bytes(include_bytes!("assets/rust-downloader-icon.png")) {
+    if let Some(icon) = load_app_icon() {
         viewport = viewport.with_icon(Arc::new(icon));
     }
     let options = eframe::NativeOptions {
@@ -479,6 +479,16 @@ fn main() -> eframe::Result<()> {
             ..Default::default()
         })),
     )
+}
+
+fn load_app_icon() -> Option<egui::IconData> {
+    let image = image::load_from_memory(include_bytes!("assets/rust-downloader-icon.ico")).ok()?;
+    let rgba = image.to_rgba8();
+    Some(egui::IconData {
+        width: rgba.width(),
+        height: rgba.height(),
+        rgba: rgba.into_raw(),
+    })
 }
 
 fn normalize_window_size(config: &mut AppConfig) {
