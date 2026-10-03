@@ -4,9 +4,15 @@ use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
+use std::sync::Arc;
 use std::sync::mpsc::{self, Receiver};
 use std::thread;
 use std::time::Instant;
+
+const DEFAULT_WINDOW_WIDTH: f32 = 640.0;
+const DEFAULT_WINDOW_HEIGHT: f32 = 960.0;
+const MIN_WINDOW_WIDTH: f32 = 640.0;
+const MIN_WINDOW_HEIGHT: f32 = 480.0;
 
 #[derive(Clone, Debug)]
 enum DownloadMessage {
@@ -59,7 +65,7 @@ struct AppConfig {
     always_on_top: bool,
 }
 
-#[derive(PartialEq)]
+#[derive(Clone, Copy, PartialEq)]
 enum Tab {
     Download,
     Config,
@@ -75,8 +81,8 @@ struct App {
     rx: Option<Receiver<DownloadMessage>>,
     config: AppConfig,
     current_tab: Tab,
-    always_on_top: bool,
     install_status: String,
+    logo: Option<egui::TextureHandle>,
 }
 
 impl Default for App {
@@ -95,13 +101,13 @@ impl Default for App {
                 git_path: "git".to_string(),
                 primary_color: [0.27, 0.51, 0.71], // Steel blue (normalized RGB)
                 secondary_color: [0.39, 0.58, 0.93], // Cornflower blue (normalized RGB)
-                window_width: 600.0,
-                window_height: 500.0,
+                window_width: DEFAULT_WINDOW_WIDTH,
+                window_height: DEFAULT_WINDOW_HEIGHT,
                 always_on_top: false,
             },
             current_tab: Tab::Download,
-            always_on_top: false,
             install_status: "Ready to install dependencies".to_string(),
+            logo: None,
         }
     }
 }
@@ -110,6 +116,16 @@ impl eframe::App for App {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         // Request continuous repaint for smooth progress bar
         ctx.request_repaint();
+
+        if self.logo.is_none() {
+            if let Ok(icon) = eframe::icon_data::from_png_bytes(include_bytes!("assets/rust-downloader-icon.png")) {
+                let image = egui::ColorImage::from_rgba_unmultiplied(
+                    [icon.width as usize, icon.height as usize],
+                    &icon.rgba,
+                );
+                self.logo = Some(ctx.load_texture("app-logo", image, egui::TextureOptions::LINEAR));
+            }
+        }
 
         // Poll for messages from download thread
         let mut should_clear_rx = false;
@@ -142,36 +158,55 @@ impl eframe::App for App {
             self.rx = None;
         }
 
-        // Custom top bar with better styling
-        egui::TopBottomPanel::top("custom_top_bar").show(ctx, |ui| {
-            ui.add_space(8.0);
-            ui.horizontal(|ui| {
-                // Logo and title
-                ui.heading("📥");
-                ui.heading("Any Downloader");
-                ui.add_space(30.0);
-                
-                // Styled tabs
-                ui.style_mut().visuals.widgets.hovered.bg_fill = egui::Color32::from_gray(50);
-                ui.style_mut().visuals.widgets.active.bg_fill = egui::Color32::from_gray(60);
-                
-                ui.selectable_value(&mut self.current_tab, Tab::Download, "📥 Download");
-                ui.selectable_value(&mut self.current_tab, Tab::Config, "⚙️ Config");
-                ui.selectable_value(&mut self.current_tab, Tab::Dependencies, "📦 Dependencies");
-                
-                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    ui.add_space(10.0);
-                    let pin_label = if self.config.always_on_top { "📌 Pinned" } else { "📌 Pin" };
-                    if ui.button(pin_label).clicked() {
-                        self.config.always_on_top = !self.config.always_on_top;
-                        self.always_on_top = self.config.always_on_top;
-                        self.status = format!("Pin {}", if self.config.always_on_top { "enabled (restart app to apply)" } else { "disabled" });
+        egui::TopBottomPanel::top("custom_top_bar")
+            .frame(egui::Frame::none().fill(egui::Color32::from_rgb(22, 25, 32)).inner_margin(egui::Margin::symmetric(18.0, 12.0)))
+            .show(ctx, |ui| {
+                ui.horizontal(|ui| {
+                    if let Some(logo) = &self.logo {
+                        ui.add(egui::Image::new(logo).fit_to_exact_size(egui::vec2(38.0, 38.0)));
                     }
+                    ui.vertical(|ui| {
+                        ui.label(egui::RichText::new("Any Downloader").size(18.0).strong());
+                        ui.label(egui::RichText::new("Downloads, made simple").size(11.0).color(egui::Color32::from_gray(160)));
+                    });
+                    ui.add_space(18.0);
+
+                    for (tab, label) in [
+                        (Tab::Download, "Download"),
+                        (Tab::Config, "Settings"),
+                        (Tab::Dependencies, "Dependencies"),
+                    ] {
+                        let selected = self.current_tab == tab;
+                        let button = egui::Button::new(egui::RichText::new(label).size(13.0).color(
+                            if selected { egui::Color32::WHITE } else { egui::Color32::from_gray(175) },
+                        )).fill(if selected { egui::Color32::from_rgb(48, 82, 125) } else { egui::Color32::TRANSPARENT });
+                        if ui.add(button).clicked() {
+                            self.current_tab = tab;
+                        }
+                    }
+
+                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                        let pin_label = if self.config.always_on_top { "Pinned" } else { "Pin" };
+                        if ui.button(format!("📌 {pin_label}")).clicked() {
+                            self.config.always_on_top = !self.config.always_on_top;
+                            ctx.send_viewport_cmd(egui::ViewportCommand::WindowLevel(
+                                if self.config.always_on_top { egui::viewport::WindowLevel::AlwaysOnTop } else { egui::viewport::WindowLevel::Normal },
+                            ));
+                            self.status = format!("Pin {}", if self.config.always_on_top { "enabled" } else { "disabled" });
+                        }
+                    });
                 });
             });
-            ui.add_space(5.0);
-            ui.separator();
-        });
+
+        if matches!(self.current_tab, Tab::Download | Tab::Config) {
+            egui::TopBottomPanel::bottom("license_footer")
+                .frame(egui::Frame::none().fill(egui::Color32::from_rgb(22, 25, 32)).inner_margin(egui::Margin::symmetric(14.0, 5.0)))
+                .show(ctx, |ui| {
+                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                        ui.label(egui::RichText::new("MIT License · © 2026 Any Downloader Contributors").size(10.0).color(egui::Color32::from_gray(145)));
+                    });
+                });
+        }
 
         egui::CentralPanel::default().show(ctx, |ui| {
             match self.current_tab {
@@ -222,6 +257,7 @@ impl eframe::App for App {
                     }
                 }
                 Tab::Config => {
+                    egui::ScrollArea::vertical().show(ui, |ui| {
                     ui.add_space(15.0);
                     ui.heading("Configuration");
                     ui.separator();
@@ -254,16 +290,22 @@ impl eframe::App for App {
                     
                     ui.horizontal(|ui| {
                         ui.label("Width:");
-                        ui.add(egui::DragValue::new(&mut self.config.window_width).speed(10.0));
+                        ui.add(egui::DragValue::new(&mut self.config.window_width)
+                            .speed(10.0)
+                            .clamp_range(MIN_WINDOW_WIDTH..=3840.0));
                         ui.label("px");
                         ui.add_space(20.0);
                         ui.label("Height:");
-                        ui.add(egui::DragValue::new(&mut self.config.window_height).speed(10.0));
+                        ui.add(egui::DragValue::new(&mut self.config.window_height)
+                            .speed(10.0)
+                            .clamp_range(MIN_WINDOW_HEIGHT..=2160.0));
                         ui.label("px");
                     });
                     ui.add_space(10.0);
                     
                     if ui.button("Apply Window Size").clicked() {
+                        self.config.window_width = self.config.window_width.max(MIN_WINDOW_WIDTH);
+                        self.config.window_height = self.config.window_height.max(MIN_WINDOW_HEIGHT);
                         ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(
                             self.config.window_width,
                             self.config.window_height,
@@ -320,6 +362,7 @@ impl eframe::App for App {
                             self.status = "Configuration saved".to_string();
                         }
                     }
+                    });
                 }
                 Tab::Dependencies => {
                     ui.add_space(15.0);
@@ -404,19 +447,27 @@ impl App {
 
 fn main() -> eframe::Result<()> {
     // Try to load config from file
-    let config = if let Ok(config_str) = std::fs::read_to_string("config.json") {
+    let mut config = if let Ok(config_str) = std::fs::read_to_string("config.json") {
         serde_json::from_str(&config_str).unwrap_or_default()
     } else {
         AppConfig::default()
     };
+    normalize_window_size(&mut config);
 
     let config_clone = config.clone();
-    let always_on_top = config.always_on_top;
+    let mut viewport = egui::ViewportBuilder::default()
+        .with_inner_size([config.window_width, config.window_height])
+        .with_min_inner_size([MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT])
+        .with_resizable(true);
+    if config.always_on_top {
+        viewport = viewport.with_always_on_top();
+    }
+    if let Ok(icon) = eframe::icon_data::from_png_bytes(include_bytes!("assets/rust-downloader-icon.png")) {
+        viewport = viewport.with_icon(Arc::new(icon));
+    }
     let options = eframe::NativeOptions {
         default_theme: eframe::Theme::Dark,
-        viewport: egui::ViewportBuilder::default()
-            .with_inner_size([config.window_width, config.window_height])
-            .with_resizable(true),
+        viewport,
         ..Default::default()
     };
 
@@ -425,10 +476,18 @@ fn main() -> eframe::Result<()> {
         options,
         Box::new(move |_cc| Box::new(App {
             config: config_clone,
-            always_on_top,
             ..Default::default()
         })),
     )
+}
+
+fn normalize_window_size(config: &mut AppConfig) {
+    if !config.window_width.is_finite() || config.window_width < MIN_WINDOW_WIDTH {
+        config.window_width = DEFAULT_WINDOW_WIDTH;
+    }
+    if !config.window_height.is_finite() || config.window_height < MIN_WINDOW_HEIGHT {
+        config.window_height = DEFAULT_WINDOW_HEIGHT;
+    }
 }
 
 fn get_download_dir(config: &AppConfig) -> PathBuf {
