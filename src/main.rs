@@ -203,7 +203,7 @@ impl eframe::App for App {
                 .frame(egui::Frame::none().fill(egui::Color32::from_rgb(22, 25, 32)).inner_margin(egui::Margin::symmetric(14.0, 5.0)))
                 .show(ctx, |ui| {
                     ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                        ui.label(egui::RichText::new("MIT License · © 2026 Any Downloader Contributors").size(10.0).color(egui::Color32::from_gray(145)));
+                        ui.label(egui::RichText::new("MIT License · © 2026 Yohann / Misaki-ux").size(10.0).color(egui::Color32::from_gray(145)));
                     });
                 });
         }
