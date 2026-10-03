@@ -1,5 +1,6 @@
-# Any Downloader
+# Any Downloader V 1.0.3
 
+<img width="644" height="987" alt="image" src="https://github.com/user-attachments/assets/213f7e62-09b4-43a0-984d-8fc2615dbf87" />
 A modern Rust GUI application for downloading files from various sources without using Windows Explorer dialogs.
 
 ![Rust](https://img.shields.io/badge/Rust-1.99.0-orange)
@@ -8,22 +9,23 @@ A modern Rust GUI application for downloading files from various sources without
 
 ## Features
 
-- 🎨 **Modern Dark Theme** - Clean, professional interface
-- 🪟 **Custom App Branding** - Uses the project icon in the native window and a modern custom top bar
-- 📥 **Multi-Protocol Support**:
+
+-  **Modern Dark Theme** - Clean, professional interface
+-  **Custom App Branding** - Uses the project icon in the native window and a modern custom top bar
+-  **Multi-Protocol Support**:
   - HTTP/HTTPS file downloads
   - Magnet links (via aria2c)
   - Torrent files (via aria2c)
   - Git repositories (via git clone)
   - YouTube videos (via yt-dlp)
-- 📊 **Real-time Progress** - Download speed and progress tracking
-- ⚙️ **Customizable** - Configure paths, window size, and theme colors
-- 📜 **Scrollable Settings** - Access the full configuration panel in a compact window
-- 📦 **Built-in Dependency Installer** - Install aria2c, yt-dlp, and git directly from the app
-- 🎯 **Auto-Detection** - Automatically detects download type from URL
-- 💾 **Config Persistence** - Settings saved to JSON file
-- 📌 **Pin Mode** - Keep window always on top
-- ⚖️ **MIT Licensed** - License and copyright notice shown in the app
+-  **Real-time Progress** - Download speed and progress tracking
+-  **Customizable** - Configure paths, window size, and theme colors
+-  **Scrollable Settings** - Access the full configuration panel in a compact window
+-  **Built-in Dependency Installer** - Install aria2c, yt-dlp, and git directly from the app
+-  **Auto-Detection** - Automatically detects download type from URL
+-  **Config Persistence** - Settings saved to JSON file
+-  **Pin Mode** - Keep window always on top
+-  **MIT Licensed** - License and copyright notice shown in the app
 
 ## Screenshots
 
